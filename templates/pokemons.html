@@ -1,0 +1,48 @@
+<!--
+  ARCHIVO: templates/pokemons.html
+  PROPÓSITO: Página principal de listado y detalle de pokemons.
+
+  ¿POR QUÉ EXISTE?
+    Es el template principal que usan DOS endpoints:
+      - GET /pokemons_html  → recibe una LISTA de pokemons en pokemon_html
+      - GET /pokemon_html/{id} → recibe UN solo pokemon en pokemon_html
+    Jinja2 permite que el mismo template funcione para los dos casos porque
+    el bucle {% for %} funciona igual con una lista de 1 elemento.
+
+  VARIABLES DEL CONTEXTO (pasadas desde main.py):
+    request      → siempre requerido por Jinja2 en FastAPI
+    pokemon_html → puede ser un objeto PokemonID o una lista de PokemonID
+
+  FLUJO DE RENDERIZADO:
+    1. {% include 'header.html' %}  → inserta DOCTYPE, <head> y apertura de <body>
+    2. {% for pokemon in pokemon_html %} → itera sobre la lista (o el objeto solo)
+    3. {% include 'pokemon.html' %}  → renderiza la tarjeta de cada elemento
+    4. {% include 'footer.html' %}  → cierra <body> y <html>
+
+  ¿CÓMO ADAPTARLO?
+    Cambia el nombre del template y las variables para tu entidad.
+    Puedes agregar tablas, cards Bootstrap, grids CSS, etc. aquí.
+-->
+
+{# Incluye el encabezado HTML (DOCTYPE, head, body abierto) #}
+{% include 'header.html' %}
+
+
+<ul>
+{# Itera sobre cada pokemon de la lista recibida desde el endpoint #}
+{% for pokemon in pokemon_html %}
+    <li>
+        {#
+          Incluye el fragmento de cada pokemon.
+          IMPORTANTE: dentro del include, la variable sigue llamándose
+          'pokemon_html' (no 'pokemon'), porque pokemons.html reutiliza
+          el mismo fragmento para lista Y para detalle individual.
+        #}
+        {% include 'pokemon.html' %}
+    </li>
+{% endfor %}
+</ul>
+
+
+{# Incluye el pie de página (cierre de body y html) #}
+{% include 'footer.html' %}

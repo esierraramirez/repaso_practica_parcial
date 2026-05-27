@@ -1,0 +1,245 @@
+==============================================================================
+  GUÍA COMPLETA PARA EJECUTAR EL SERVIDOR FASTAPI
+  Proyecto: Pokemon API con FastAPI + SQLModel + Jinja2
+==============================================================================
+
+ESTRUCTURA DEL PROYECTO
+------------------------
+  pokemon/
+    main.py           ← Punto de entrada. Define todos los endpoints HTTP.
+    db.py             ← Conexión a la BD, sesiones, creación de tablas.
+    model.py          ← Esquemas de datos (PokemonBase, PokemonID, PokemonUpdate).
+    pokemon_type.py   ← Enum con los tipos permitidos (fuego, agua, etc.).
+    operation_db.py   ← CRUD contra la base de datos (activo en los endpoints).
+    operation_csv.py  ← CRUD alternativo usando un archivo CSV.
+    utils.py          ← Funciones auxiliares: guardar imágenes local y en Supabase.
+    requirements.txt  ← Lista de dependencias del proyecto.
+    templates/
+        header.html   ← Cabecera HTML reutilizable ({% include %}).
+        footer.html   ← Pie de página HTML reutilizable ({% include %}).
+        pokemon.html  ← Tarjeta de un pokemon (sub-fragmento del bucle).
+        pokemons.html ← Página principal: lista o detalle de pokemons.
+
+
+==============================================================================
+  PASO 1 — CREAR Y ACTIVAR EL ENTORNO VIRTUAL
+==============================================================================
+
+Abre una terminal (PowerShell o CMD) dentro de la carpeta del proyecto:
+
+  cd C:\Users\USUARIO\Desktop\pokemon
+
+Crear entorno virtual (solo la primera vez):
+
+  python -m venv venv
+
+Activar el entorno virtual:
+
+  En Windows PowerShell:
+    .\venv\Scripts\Activate.ps1
+
+  En Windows CMD:
+    venv\Scripts\activate.bat
+
+  En Mac / Linux:
+    source venv/bin/activate
+
+Cuando está activo, el prompt cambia y muestra:  (venv)
+
+
+==============================================================================
+  PASO 2 — INSTALAR DEPENDENCIAS
+==============================================================================
+
+Con el entorno virtual ACTIVO, instala todo lo necesario:
+
+  pip install -r requirements.txt
+
+Si falta alguna dependencia específica, instálala manualmente:
+
+  pip install fastapi uvicorn sqlmodel python-dotenv supabase
+
+
+==============================================================================
+  PASO 3 — CONFIGURAR LAS VARIABLES DE ENTORNO (.env)
+==============================================================================
+
+Crea un archivo llamado  .env  en la raíz del proyecto (misma carpeta que main.py).
+NUNCA subas este archivo a Git (agrégalo al .gitignore).
+
+Contenido del archivo .env:
+
+  # Base de datos (Neon PostgreSQL o cualquier PostgreSQL)
+  DATABASE_URL=postgresql+psycopg2://usuario:contraseña@host/nombre_base_datos
+
+  # Si prefieres SQLite local (sin base de datos externa):
+  # Edita db.py y cambia:  engine = create_engine(neon_url_db)
+  # por:                   engine = create_engine(sqlite_url)
+  # No necesitas nada en el .env para SQLite.
+
+  # Supabase Storage (solo si usas los endpoints /image/remote)
+  SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
+  SUPABASE_KEY=tu-anon-key-o-service-key
+  SUPABASE_BUCKET=nombre-del-bucket
+
+
+==============================================================================
+  PASO 4 — INICIAR EL SERVIDOR
+==============================================================================
+
+Con el entorno virtual ACTIVO y estando en la carpeta del proyecto:
+
+  uvicorn main:app --reload
+
+  Parámetros explicados:
+    main      → nombre del archivo Python (main.py, sin extensión)
+    app       → nombre de la instancia FastAPI dentro de main.py  (app = FastAPI(...))
+    --reload  → recarga automáticamente el servidor cuando guardas cambios en el código
+                SOLO usar en desarrollo; NO usar en producción.
+
+Salida esperada en la terminal:
+  INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+  INFO:     Started reloader process [...]
+  INFO:     Started server process [...]
+  INFO:     Waiting for application startup.
+  INFO:     Application startup complete.
+
+Para detener el servidor:  presiona  CTRL + C
+
+
+==============================================================================
+  PASO 5 — OPCIONES ADICIONALES DEL SERVIDOR
+==============================================================================
+
+Cambiar el puerto (por defecto es 8000):
+
+  uvicorn main:app --reload --port 8080
+
+Escuchar en todas las interfaces de red (útil para acceder desde otro dispositivo):
+
+  uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+Modo producción (sin --reload, con múltiples workers):
+
+  uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+
+
+==============================================================================
+  PASO 6 — ACCEDER A LA API
+==============================================================================
+
+Una vez el servidor esté corriendo, abre el navegador en:
+
+  Página de inicio (HTML inline):
+    http://127.0.0.1:8000/
+
+  Documentación interactiva Swagger UI (para probar todos los endpoints):
+    http://127.0.0.1:8000/docs
+
+  Documentación alternativa ReDoc:
+    http://127.0.0.1:8000/redoc
+
+  Lista de pokemons en JSON:
+    http://127.0.0.1:8000/pokemon
+
+  Un pokemon por id en JSON:
+    http://127.0.0.1:8000/pokemon/1
+
+  Lista de pokemons en HTML (Jinja2):
+    http://127.0.0.1:8000/pokemons_html
+
+  Un pokemon por id en HTML (Jinja2):
+    http://127.0.0.1:8000/pokemon_html/1
+
+
+==============================================================================
+  ENDPOINTS DISPONIBLES (REFERENCIA RÁPIDA)
+==============================================================================
+
+  MÉTODO   RUTA                    DESCRIPCIÓN
+  ------   ----                    -----------
+  GET      /                       Página de inicio (HTML inline)
+  GET      /docs                   Swagger UI (documentación interactiva)
+  GET      /redoc                  ReDoc (documentación alternativa)
+
+  POST     /pokemon                Crear un nuevo pokemon
+                                   Body JSON: {"name":"Pikachu","tipo":"electrico","level":5}
+
+  GET      /pokemon                Listar todos los pokemons (JSON)
+  GET      /pokemon/{id}           Ver un pokemon por id (JSON)
+  PATCH    /pokemon/{id}           Actualizar parcialmente un pokemon
+                                   Body JSON: {"level":10}  (solo los campos que cambien)
+  DELETE   /pokemon/{id}           Eliminar un pokemon por id
+
+  GET      /pokemons_html          Listar todos los pokemons (HTML con Jinja2)
+  GET      /pokemon_html/{id}      Ver un pokemon por id (HTML con Jinja2)
+
+  POST     /image/local            Subir imagen al disco local (multipart/form-data)
+  POST     /image/remote           Subir imagen a Supabase Storage (multipart/form-data)
+
+  GET      /template               Renderiza templates/index.html (crear si se necesita)
+
+
+==============================================================================
+  PASO 7 — CÓMO ADAPTAR ESTE PROYECTO A OTRO DOMINIO
+==============================================================================
+
+  1. pokemon_type.py  → Cambia el Enum "Tipo" por las categorías de tu entidad.
+                        Ejemplo: class Categoria(str, Enum): ROPA="ropa" ...
+
+  2. model.py         → Renombra PokemonBase → TuEntidadBase,
+                                 PokemonID   → TuEntidadID,
+                                 PokemonUpdate → TuEntidadUpdate.
+                        Ajusta los campos y sus validaciones.
+
+  3. operation_db.py  → Renombra las funciones y reemplaza los modelos.
+                        La lógica session.add/commit/refresh se mantiene igual.
+
+  4. operation_csv.py → (Opcional) Ajusta CSV_FILE, columns y los modelos.
+
+  5. main.py          → Cambia los nombres de los endpoints y las funciones.
+                        El patrón @app.post / @app.get / @app.patch / @app.delete
+                        se mantiene igual.
+
+  6. templates/       → Renombra las variables (pokemon_html → tuEntidad_html)
+                        tanto en los TemplateResponse de main.py como en los
+                        archivos .html.
+
+
+==============================================================================
+  ERRORES COMUNES Y SOLUCIONES
+==============================================================================
+
+  ERROR: "ModuleNotFoundError: No module named 'fastapi'"
+  SOLUCIÓN: El entorno virtual no está activo o las dependencias no instaladas.
+    → Activa el entorno: .\venv\Scripts\Activate.ps1
+    → Instala: pip install -r requirements.txt
+
+  ERROR: "sqlalchemy.exc.OperationalError" o problemas de conexión a BD
+  SOLUCIÓN: Verifica que DATABASE_URL en el .env sea correcta y que la BD
+            esté disponible. Para pruebas rápidas usa SQLite (ver Paso 3).
+
+  ERROR: "RuntimeError: No credentials provided" en subida de imágenes
+  SOLUCIÓN: Faltan SUPABASE_URL o SUPABASE_KEY en el .env.
+
+  ERROR: "Address already in use" al arrancar uvicorn
+  SOLUCIÓN: El puerto 8000 está ocupado. Usa otro puerto:
+    → uvicorn main:app --reload --port 8001
+
+  ERROR: PowerShell no permite ejecutar scripts (Activate.ps1)
+  SOLUCIÓN: Ejecuta primero en PowerShell como administrador:
+    → Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+
+==============================================================================
+  NOTAS FINALES
+==============================================================================
+
+  - El servidor crea las tablas en la BD automáticamente al arrancar
+    (gracias a create_all_tables en db.py con lifespan=).
+  - Usa /docs para probar todos los endpoints sin necesidad de Postman.
+  - Los archivos .env NUNCA deben subirse a repositorios públicos.
+  - Para producción usa variables de entorno del sistema operativo o
+    servicios como Railway, Render, Fly.io, etc.
+
+==============================================================================

@@ -1,0 +1,26 @@
+<!--
+  ARCHIVO: templates/header.html
+  PROPÓSITO: Cabecera HTML reutilizable (fragmento parcial).
+
+  ¿POR QUÉ EXISTE?
+    Jinja2 permite dividir el HTML en fragmentos con {% include 'archivo.html' %}.
+    Todo lo que va ANTES del contenido de cada página (DOCTYPE, <head>, apertura
+    del <body>) vive aquí. Así solo se cambia en un lugar y afecta a todas las páginas.
+
+  ¿CÓMO USARLO?
+    Al inicio de cualquier template pon: {% include 'header.html' %}
+    Jinja2 inyectará este contenido literalmente en ese punto.
+
+  ¿CÓMO ADAPTARLO?
+    Cambia el <title>, agrega tu CSS (link rel="stylesheet"), meta tags, favicon, etc.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Cambia el title por el nombre de tu proyecto -->
+    <title>Pokemon FUCK</title>
+    <!-- Aquí agrega links a CSS, fuentes o meta tags adicionales -->
+</head>
+<body>
+<!-- A partir de aquí empieza el contenido específico de cada página -->

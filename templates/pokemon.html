@@ -1,0 +1,38 @@
+
+<!--
+  ARCHIVO: templates/pokemon.html
+  PROPÓSITO: Tarjeta/fragmento HTML para mostrar los datos de UN pokemon.
+
+  ¿POR QUÉ EXISTE?
+    Este archivo es un sub-fragmento que pokemons.html incluye DENTRO del bucle
+    {% for pokemon in pokemon_html %}. Separarlo en su propio archivo permite:
+      - Reutilizarlo en otras páginas sin duplicar código.
+      - Editar el diseño de cada tarjeta sin tocar la lógica del bucle.
+
+  VARIABLE DISPONIBLE: pokemon_html
+    - Cuando se llama desde el bucle en pokemons.html, pokemon_html es el
+      objeto de la iteración actual (un PokemonID).
+    - Cuando se llama desde el endpoint /pokemon_html/{id}, pokemon_html es
+      un solo objeto PokemonID.
+
+  SINTAXIS JINJA2:
+    {{ variable }}         → imprime el valor de la variable
+    {{ objeto.campo }}     → accede al atributo del objeto (igual que Python)
+
+  ¿CÓMO ADAPTARLO?
+    Cambia los campos (name, tipo, id, level) por los de tu modelo.
+    Agrega estilos CSS o estructura HTML más compleja según tu diseño.
+-->
+
+<!-- Nombre del elemento (campo del modelo) -->
+<h1>Nombre Pokemon: {{ pokemon_html.name }}</h1>
+<br>
+<!-- Tipo: viene del Enum Tipo definido en pokemon_type.py -->
+<h3>Tipo: {{ pokemon_html.tipo }}</h3>
+<!-- ID autogenerado por la base de datos -->
+<h4>id: {{ pokemon_html.id }}</h4>
+<br>
+<!-- Nivel numérico del pokemon -->
+<h3>level: {{ pokemon_html.level }}</h3>
+
+
